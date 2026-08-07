@@ -1,0 +1,47 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // User profiles
+    match /users/{uid} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == uid;
+    }
+    
+    // Biome states (publicly viewable for community widgets, write locked to user)
+    match /biomeState/{uid} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // Action history log subcollection
+    match /actions/{uid}/log/{docId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // Quest / Challenge progress
+    match /userChallengeProgress/{uid}/challenges/{challengeId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // Photo AI verifications
+    match /photoVerifications/{docId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+
+    // City / College benchmark stats
+    match /cityStats/{cityId} {
+      allow read: if true;
+      allow write: if false; // Server-side function only
+    }
+
+    // Co-op shared biomes
+    match /coopBiomes/{groupId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid in resource.data.memberUids;
+    }
+  }
+}

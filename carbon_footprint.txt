@@ -1,0 +1,98 @@
+import React, { useState } from "react"
+import styled from 'styled-components'
+
+const labels = {
+   imagesDisplay:"Display Images",
+   imagesGreyscale:"Greyscale Images"
+}
+
+const ProofRead = props =>{
+
+   const [state, setState] = useState({
+       imagesDisplay:true,
+       imagesGreyscale:false,
+       imageSize:"full"
+   })
+
+   const negateStateValue = stateIndex => {
+       setState( prevState => {
+           return {
+               ...prevState,
+               [stateIndex]: !prevState[stateIndex],
+           }
+       })
+   }
+
+   const selectChanged = e =>{
+       let imageSize = e.target.value;
+       setState( prevState =>{
+           return{ ...prevState, imageSize}
+       })
+   }
+
+   const printConfiguration =
+       <div>
+       <h4>Print Configurations</h4>
+           <form
+               className="dont-print"
+               onSubmit={ e => e.preventDefault()}
+           >
+               {["imagesDisplay","imagesGreyscale"].map((item,index)=>
+                   <fieldset
+                       key={index}
+                   >
+                       <input
+                              type="checkbox"
+                              onChange={()=> negateStateValue(item)}
+                              checked={state[item]}
+                       />
+                       <label
+                           className="padd"
+                       >{labels[item]}</label>
+                   </fieldset>
+               )}
+
+               <fieldset>
+                   <label>Images size</label>
+                   <select
+                       className="padd"
+                       onChange={selectChanged}
+                       value={state.imageSize}
+                   >
+                       {["full","small","tiny"].map((item,index)=>
+                           <option key={index} value={item}>{item}</option>
+                       )}
+                   </select>
+               </fieldset>
+
+           </form>
+       </div>
+
+
+
+css:
+const ProofReadWrap = styled.div`
+   padding:20px;
+   form{
+       display:flex;
+       .padd{
+           margin-left:10px;
+       }
+   }
+   p{
+       font-size:14px;
+   }
+   @media print {
+       .dont-print{
+           display:none;
+       }
+       p{
+           font-size:12px;
+       }
+       img{
+           max-width:100vw;
+           ${props=>props.imagesDisplay? "" : "display:none"}
+           ${props=>props.imagesGreyscale? "filter: grayscale(100%);" : ""}
+           ${props=>props.imageSize !== "full"?  `width:${props.imageSize === "small"? "50" : "15"}vw;` : ""}
+       }
+   }
